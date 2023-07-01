@@ -19,3 +19,6 @@ def test_build_url(greenwich_weather):
     assert greenwich_weather._build_url() == \
            f"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=51.4778&lon=-0.0014"
 
+def test_request(greenwich_weather):
+    assert greenwich_weather._request() == []
+
