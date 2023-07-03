@@ -4,6 +4,7 @@ from fridgeGuardian.yr import Yr
 from pytest import fixture
 from mock import patch, Mock
 from dateutil.parser import parse
+from requests import Response
 
 GREENWICH_LONGITUDE = -0.00143
 GREENWICH_LATITUDE = 51.47782
@@ -1013,23 +1014,21 @@ def test_build_url(greenwich_weather):
            f"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=51.4778&lon=-0.0014"
 
 
-@patch('fridgeGuardian.yr.datetime.now', name='mock_now')
-def test_get_weather_forcast(mock_now, greenwich_weather):
+@patch('fridgeGuardian.yr.datetime', name='mock_datetime')
+def test_get_weather_forcast_first_request(mock_datetime, greenwich_weather):
 
     # First request
-    mock_now.return_value = parse
-    mock_response = Mock(name='mock_response')
-    mock_response.status_code = 200
-    mock_response.headers = HEADERS
-    mock_response.json = WEATHER_FORCAST
+    mock_datetime.now.return_value = parse('Mon, 03 Jul 2023 07:00:00 GMT')
+    response = Response()
+    response.status_code = 200
+    response.headers = HEADERS
+    response.json = Mock(return_value=WEATHER_FORCAST)
+    greenwich_weather._request = Mock(return_value=response)
 
     assert greenwich_weather.get_weather_forcast() == WEATHER_FORCAST
     assert greenwich_weather.expire_raw == HEADERS['Expires']
     assert greenwich_weather.expire == parse(HEADERS['Expires'])
 
-    assert greenwich_weather.get_weather_forcast() == WEATHER_FORCAST
-
-    Weather
 
 @patch('fridgeGuardian.yr.requests.get', name='mock_get')
 def test_request(mock_get, greenwich_weather):
