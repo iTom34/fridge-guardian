@@ -1078,6 +1078,26 @@ def test_get_weather_forcast_expired_and_updated(mock_datetime, greenwich_weathe
     assert greenwich_weather.expire_raw == 'Mon, 03 Jul 2023 08:00:00 GMT'
     assert greenwich_weather.expire == parse('Mon, 03 Jul 2023 08:00:00 GMT')
 
+@patch('fridgeGuardian.yr.datetime', name='mock_datetime')
+def test_get_weather_forcast_not_expired(mock_datetime, greenwich_weather):
+    """
+    Testing get_weather_forcast() the branch when the forcast stored in the Yr object has expired and the Yr model
+    has been updated
+    """
+    # Mocking
+    mock_datetime.now.return_value = parse('Mon, 03 Jul 2023 07:29:00 GMT')
+    greenwich_weather.weather_forcast = WEATHER_FORCAST
+    greenwich_weather.expire = parse('Mon, 03 Jul 2023 07:30:00 GMT')
+    greenwich_weather.expire_raw = 'Mon, 03 Jul 2023 07:30:00 GMT'
+    greenwich_weather._request = Mock()
+
+    assert greenwich_weather.get_weather_forcast() == WEATHER_FORCAST
+    assert greenwich_weather.weather_forcast == WEATHER_FORCAST
+    assert greenwich_weather.expire_raw == 'Mon, 03 Jul 2023 07:30:00 GMT'
+    assert greenwich_weather.expire == parse('Mon, 03 Jul 2023 07:30:00 GMT')
+    greenwich_weather._request.assert_not_called()
+
+
 @patch('fridgeGuardian.yr.requests.get', name='mock_get')
 def test_request(mock_get, greenwich_weather):
     url = "test_URL"
