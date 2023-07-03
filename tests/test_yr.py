@@ -1031,6 +1031,8 @@ def test_get_weather_forcast_first_request(mock_datetime, greenwich_weather):
     assert greenwich_weather.weather_forcast == WEATHER_FORCAST
     assert greenwich_weather.expire_raw == HEADERS['Expires']
     assert greenwich_weather.expire == parse(HEADERS['Expires'])
+    greenwich_weather._request.assert_called_once()
+
 
 
 @patch('fridgeGuardian.yr.datetime', name='mock_datetime')
@@ -1054,6 +1056,7 @@ def test_get_weather_forcast_expired_and_not_updated(mock_datetime, greenwich_we
     assert greenwich_weather.weather_forcast == WEATHER_FORCAST
     assert greenwich_weather.expire_raw == 'Mon, 03 Jul 2023 07:30:00 GMT'
     assert greenwich_weather.expire == parse('Mon, 03 Jul 2023 07:30:00 GMT')
+    greenwich_weather._request.assert_called_once()
 
 
 @patch('fridgeGuardian.yr.datetime', name='mock_datetime')
@@ -1077,6 +1080,8 @@ def test_get_weather_forcast_expired_and_updated(mock_datetime, greenwich_weathe
     assert greenwich_weather.weather_forcast == WEATHER_FORCAST_2
     assert greenwich_weather.expire_raw == 'Mon, 03 Jul 2023 08:00:00 GMT'
     assert greenwich_weather.expire == parse('Mon, 03 Jul 2023 08:00:00 GMT')
+    greenwich_weather._request.assert_called_once()
+
 
 @patch('fridgeGuardian.yr.datetime', name='mock_datetime')
 def test_get_weather_forcast_not_expired(mock_datetime, greenwich_weather):
