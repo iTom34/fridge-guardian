@@ -1028,16 +1028,43 @@ def test_get_weather_forcast_first_request(mock_datetime, greenwich_weather):
 
     # Assertion
     assert greenwich_weather.get_weather_forcast() == WEATHER_FORCAST
+    assert greenwich_weather.weather_forcast == WEATHER_FORCAST
     assert greenwich_weather.expire_raw == HEADERS['Expires']
     assert greenwich_weather.expire == parse(HEADERS['Expires'])
 
 
 @patch('fridgeGuardian.yr.datetime', name='mock_datetime')
-def test_get_weather_forcast_weather_expired_and_updated(mock_datetime, greenwich_weather):
-
+def test_get_weather_forcast_expired_and_not_updated(mock_datetime, greenwich_weather):
+    """
+    Testing get_weather_forcast() the branch when the forcast stored in the Yr object has expired and the Yr model
+    has NOT been updated
+    """
     # Mocking
     mock_datetime.now.return_value = parse('Mon, 03 Jul 2023 07:31:00 GMT')
-    greenwich_weather.weather_forcast = {'not_empty': 'not_empty'}
+    greenwich_weather.weather_forcast = WEATHER_FORCAST
+    greenwich_weather.expire = parse('Mon, 03 Jul 2023 07:30:00 GMT')
+    greenwich_weather.expire_raw = 'Mon, 03 Jul 2023 07:30:00 GMT'
+    response = Response()
+    response.status_code = 304
+    response.headers = {'Expires': 'Mon, 03 Jul 2023 08:00:00 GMT'}
+    response.json = Mock(return_value={})
+    greenwich_weather._request = Mock(return_value=response)
+
+    assert greenwich_weather.get_weather_forcast() == WEATHER_FORCAST
+    assert greenwich_weather.weather_forcast == WEATHER_FORCAST
+    assert greenwich_weather.expire_raw == 'Mon, 03 Jul 2023 07:30:00 GMT'
+    assert greenwich_weather.expire == parse('Mon, 03 Jul 2023 07:30:00 GMT')
+
+
+@patch('fridgeGuardian.yr.datetime', name='mock_datetime')
+def test_get_weather_forcast_expired_and_updated(mock_datetime, greenwich_weather):
+    """
+    Testing get_weather_forcast() the branch when the forcast stored in the Yr object has expired and the Yr model
+    has been updated
+    """
+    # Mocking
+    mock_datetime.now.return_value = parse('Mon, 03 Jul 2023 07:31:00 GMT')
+    greenwich_weather.weather_forcast = WEATHER_FORCAST
     greenwich_weather.expire = parse('Mon, 03 Jul 2023 07:30:00 GMT')
     greenwich_weather.expire_raw = 'Mon, 03 Jul 2023 07:30:00 GMT'
     response = Response()
@@ -1047,6 +1074,7 @@ def test_get_weather_forcast_weather_expired_and_updated(mock_datetime, greenwic
     greenwich_weather._request = Mock(return_value=response)
 
     assert greenwich_weather.get_weather_forcast() == WEATHER_FORCAST_2
+    assert greenwich_weather.weather_forcast == WEATHER_FORCAST_2
     assert greenwich_weather.expire_raw == 'Mon, 03 Jul 2023 08:00:00 GMT'
     assert greenwich_weather.expire == parse('Mon, 03 Jul 2023 08:00:00 GMT')
 
