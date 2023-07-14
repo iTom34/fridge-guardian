@@ -2,12 +2,12 @@ from mysql.connector import connect, Error
 from rich.console import Console
 
 DB_NAME = "fridge_guardian"
-SHOW_DB_QUERY = "SHOW DATABASES LIKE \'fridge_guardian\'"
+TABLE_NAME = "device_states"
 CREATE_DB_QUERY = f"CREATE DATABASE IF NOT EXISTS {DB_NAME}"
 SELECT_DB_QUERY = f"USE {DB_NAME}"
-CREATE_DEVICE_STATES_DB_QUERY = """
+CREATE_DEVICE_STATES_DB_QUERY = f"""
 create table IF NOT EXISTS
-  `device_states` (
+  `{TABLE_NAME}` (
     `id` int unsigned not null auto_increment primary key,
     `name` VARCHAR(100) not null,
     `protected` BOOLEAN not null
@@ -42,3 +42,32 @@ class Database:
         except Error as e:
             print(e)
 
+    def create_device(self, device_name: str):
+        """
+        Creates the device only if it doesn't exist in the database.
+        If created the unprotected state is set.
+        If the device exists it doesn't do anything.
+
+        :param device_name: Name of the device
+        """
+        console = Console()
+        select_device_query = f"""
+        SELECT name, protected
+        FROM {TABLE_NAME}
+        WHERE name = '{device_name}'"""
+        try:
+            with connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=DB_NAME
+            ) as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(select_device_query)
+                    result = cursor.fetchall()
+
+                    print(f"Number of entries: {len(result)}")
+
+        except Error as e:
+            console.print(":warning-emoji: MySQL error:")
+            print(e)
