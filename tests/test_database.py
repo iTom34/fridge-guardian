@@ -21,3 +21,7 @@ def test_set_protected(database):
 
 def test_clear_protected(database):
     database.clear_protected("fridge")
+
+
+def test_get_protected(database):
+    print(database.get_protected("fridge"))

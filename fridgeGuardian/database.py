@@ -153,3 +153,42 @@ class Database:
         except Error as e:
             console.print(":warning-emoji: MySQL error:")
             print(e)
+
+    def get_protected(self, device_name):
+        """
+        Returns the status of the device (protected or not).
+        :return:
+        """
+
+        console = Console()
+        self.create_device(device_name)
+
+        try:
+            with connect(
+                    host=self.host,
+                    user=self.user,
+                    password=self.password,
+                    database=DB_NAME
+            ) as connection:
+                with connection.cursor() as cursor:
+                    get_protected_query = f"""
+                            SELECT name, protected
+                            FROM {TABLE_NAME}
+                            WHERE name = '{device_name}'"""
+
+                    cursor.execute(get_protected_query)
+                    result = cursor.fetchall()
+
+                    if len(result) != 1:
+                        console.print(":warning-emoji: Unexpected reply from database (got more than 1 result for a device name)=")
+                        return False
+
+                    if result[0][1] == 1:
+                        return True
+
+                    else:
+                        return False
+
+        except Error as e:
+            console.print(":warning-emoji: MySQL error:")
+            print(e)
