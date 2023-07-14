@@ -1,7 +1,18 @@
 from mysql.connector import connect, Error
+from rich.console import Console
 
-SHOW_DB_QUERY = "SHOW DATABASES"
-
+DB_NAME = "fridge_guardian"
+SHOW_DB_QUERY = "SHOW DATABASES LIKE \'fridge_guardian\'"
+CREATE_DB_QUERY = f"CREATE DATABASE IF NOT EXISTS {DB_NAME}"
+SELECT_DB_QUERY = f"USE {DB_NAME}"
+CREATE_DEVICE_STATES_DB_QUERY = """
+create table IF NOT EXISTS
+  `device_states` (
+    `id` int unsigned not null auto_increment primary key,
+    `name` VARCHAR(100) not null,
+    `protected` BOOLEAN not null
+  )
+"""
 
 class Database:
     def __init__(self,
@@ -14,6 +25,8 @@ class Database:
         self.password = password
         self.database = database
 
+        console = Console()
+
         try:
             with connect(
                 host=self.host,
@@ -21,9 +34,11 @@ class Database:
                 password=self.password
             ) as connection:
                 with connection.cursor() as cursor:
-                    cursor.execute(SHOW_DB_QUERY)
-                    for db in cursor:
-                        print(db)
+                    cursor.execute(CREATE_DB_QUERY)
+                    cursor.execute(SELECT_DB_QUERY)
+                    cursor.execute(CREATE_DEVICE_STATES_DB_QUERY)
+                    connection.commit()
+
         except Error as e:
             print(e)
 
