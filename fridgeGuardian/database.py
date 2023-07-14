@@ -14,6 +14,7 @@ create table IF NOT EXISTS
   )
 """
 
+
 class Database:
     def __init__(self,
                  host: str,
@@ -51,10 +52,7 @@ class Database:
         :param device_name: Name of the device
         """
         console = Console()
-        select_device_query = f"""
-        SELECT name, protected
-        FROM {TABLE_NAME}
-        WHERE name = '{device_name}'"""
+
         try:
             with connect(
                 host=self.host,
@@ -63,11 +61,37 @@ class Database:
                 database=DB_NAME
             ) as connection:
                 with connection.cursor() as cursor:
+                    select_device_query = f"""
+                    SELECT name, protected
+                    FROM {TABLE_NAME}
+                    WHERE name = '{device_name}'"""
+
                     cursor.execute(select_device_query)
                     result = cursor.fetchall()
 
                     print(f"Number of entries: {len(result)}")
 
+                    if len(result) == 0:
+                        console.print(f':point_right: Adding {device_name} to database')
+
+                        insert_device_query = f"""
+                        INSERT INTO {TABLE_NAME} (name, protected)
+                        VALUES
+                        ("{device_name}", FALSE)"""
+
+                        cursor.execute(insert_device_query)
+                        connection.commit()
+
         except Error as e:
             console.print(":warning-emoji: MySQL error:")
             print(e)
+
+    def set_protected(self, device_name: str):
+        """
+        Sets the device as protected.
+        If the device doesn't exist in the database it will create it.
+
+        :param device_name: Sets the device name
+        """
+
+
