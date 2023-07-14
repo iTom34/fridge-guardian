@@ -94,4 +94,62 @@ class Database:
         :param device_name: Sets the device name
         """
 
+        console = Console()
+        self.create_device(device_name)
 
+        try:
+            with connect(
+                    host=self.host,
+                    user=self.user,
+                    password=self.password,
+                    database=DB_NAME
+            ) as connection:
+                with connection.cursor() as cursor:
+                    set_protected_query = f"""
+                    UPDATE
+                        {TABLE_NAME}
+                    SET
+                        protected = TRUE
+                    WHERE
+                        name = '{device_name}'"""
+
+                    cursor.execute(set_protected_query)
+                    connection.commit()
+
+        except Error as e:
+            console.print(":warning-emoji: MySQL error:")
+            print(e)
+
+    def clear_protected(self, device_name: str):
+        """
+        Sets the device as NOT protected.
+        If the device doesn't exist in the database it will create it.
+
+        :param device_name: Sets the device name
+        """
+
+        console = Console()
+        self.create_device(device_name)
+
+        try:
+            with connect(
+                    host=self.host,
+                    user=self.user,
+                    password=self.password,
+                    database=DB_NAME
+            ) as connection:
+                with connection.cursor() as cursor:
+                    set_protected_query = f"""
+                    UPDATE
+                        {TABLE_NAME}
+                    SET
+                        protected = FALSE
+                    WHERE
+                        name = '{device_name}'"""
+
+                    cursor.execute(set_protected_query)
+                    connection.commit()
+
+        except Error as e:
+            console.print(":warning-emoji: MySQL error:")
+            print(e)
