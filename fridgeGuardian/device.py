@@ -47,7 +47,10 @@ class Device:
         self.database.set_protected(self.name)
 
     def _clear_protected(self):
-        pass
+        """
+        set the device as UNprotected
+        """
+        self.database.clear_protected(self.name)
 
     def _forcast_find_temperature_range(self) -> TemperatureRange:
         pass

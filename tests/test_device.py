@@ -35,5 +35,6 @@ def test_set_protected(device):
 
 
 def test_clear_protected(device):
-    device._set_protected()
-    device.database.set_protected.assert_called_with(DEVICE_NAME)
+    device._clear_protected()
+    device.database.clear_protected.assert_called_with(DEVICE_NAME)
+
