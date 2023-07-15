@@ -42,7 +42,6 @@ class Device:
     def _set_protected(self):
         """
         Sets the device as protected
-        :return:
         """
         self.database.set_protected(self.name)
 
@@ -53,7 +52,23 @@ class Device:
         self.database.clear_protected(self.name)
 
     def _forcast_find_temperature_range(self) -> TemperatureRange:
-        pass
+        """
+        Ask the Yr API and return the temperature range of the weather forcast
+
+        :return: Temperature range of the weather forcast
+        """
+        weather_forcast = self.weather.get_weather_forcast()
+        temperature_list = list()
+
+        for time_entry in weather_forcast['properties']['timeseries']:
+            temperature_list.append(time_entry['data']['instant']['details']['air_temperature'])
+
+        print(temperature_list)
+
+        temperature_range = TemperatureRange(minimum=min(temperature_list),
+                                             maximum=max(temperature_list))
+
+        return temperature_range
 
     def _build_envelopes(self) -> list[Envelope]:
         pass

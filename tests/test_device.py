@@ -5,11 +5,13 @@ from fridgeGuardian.database import Database
 from fridgeGuardian.email import Email
 from fridgeGuardian.temperature import TemperatureRange
 from fridgeGuardian.device import Device
+from tests.ressources import WEATHER_FORCAST
 
 from pytest import fixture
 
 DEVICE_NAME = "device_name"
 EMAIL_LIST = ["test1@test.com", "test2@test.com"]
+
 
 @fixture
 def device():
@@ -37,4 +39,12 @@ def test_set_protected(device):
 def test_clear_protected(device):
     device._clear_protected()
     device.database.clear_protected.assert_called_with(DEVICE_NAME)
+
+
+def test_find_temperature_range(device):
+    device.weather.get_weather_forcast.return_value = WEATHER_FORCAST
+
+    result = device._forcast_find_temperature_range()
+    assert result.minimum == 10.9
+    assert result.maximum == 28.3
 
