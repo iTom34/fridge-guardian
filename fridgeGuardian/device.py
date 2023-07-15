@@ -32,10 +32,19 @@ class Device:
         self.operating_range: TemperatureRange = operating_range
 
     def _get_protected(self) -> bool:
-        pass
+        """
+        Returns the status of the device (protected or not)
+
+        :return: True, the device is protected, False, the device is not protected
+        """
+        return self.database.get_protected(self.name)
 
     def _set_protected(self):
-        pass
+        """
+        Sets the device as protected
+        :return:
+        """
+        self.database.set_protected(self.name)
 
     def _clear_protected(self):
         pass
