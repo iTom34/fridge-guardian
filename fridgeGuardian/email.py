@@ -7,7 +7,9 @@ class Email:
                  smtp_port: int,
                  login: str,
                  password: str,
-                 tls: bool):
+                 tls: bool,
+                 from_email: str,
+                 from_name: str):
         """
         Constructor of the Email class
 
@@ -22,6 +24,8 @@ class Email:
                                password=password,
                                tls=tls,
                                timeout=10)
+        self.from_email = from_email
+        self.from_name = from_name
 
     def send(self, envelope: Envelope):
         """
@@ -30,3 +34,13 @@ class Email:
         :param envelope: Envelope containing the email to send
         """
         self.smtp.send(envelope)
+
+    def build_envelope(self,
+                       subject: str,
+                       message: str,
+                       dest_addr: str,
+                       dest_name: str) -> Envelope:
+        return Envelope(from_addr=(self.from_email, self.from_name),
+                        to_addr=(dest_addr, dest_name),
+                        subject=subject,
+                        text_body=message)
