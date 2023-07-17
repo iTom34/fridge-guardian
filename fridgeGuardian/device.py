@@ -52,7 +52,7 @@ class Device:
         """
         self.database.clear_protected(self.name)
 
-    def _forcast_find_temperature_range(self) -> TemperatureRange:
+    def _get_temperature_range(self) -> TemperatureRange:
         """
         Ask the Yr API and return the temperature range of the weather forcast
 
@@ -148,4 +148,38 @@ class Device:
         return envelopes
 
     def check_temperature(self):
+        """
+        Method that check the temperature, depending on the state of the device (protected / unprotected) it will send
+        an email notification.
+        """
+        console = Console()
+
+        # Check the weather forcast:
+        console.print(f"Device: {self.name}")
+        console.print(":satellite_antenna: Checking weather forcast")
+        temperature_range = self._get_temperature_range()
+        console.print(f":thermometer: Temperature range: [{temperature_range.minimum}, {temperature_range.maximum}]")
+
+        # Check device state:
+        console.print(":point_right: Checking device state")
+        protected = self._get_protected()
+
+        # Checking the device need to be unprotected
+        if protected:
+            console.print("Device is [green bold] protected")
+
+            # Check if we don't need to protect the device anymore
+            if self.operating_range.minimum < temperature_range.minimum < self.operating_range.maximum and \
+                    self.operating_range.minimum < temperature_range.maximum < self.operating_range.maximum:
+                self._send_unprotect_envelopes(temperature_range)
+                self.database.clear_protected()
+
+        # Checking if the device need to be protected
+        else:
+            console.print("Device is [red bold] unprotected")
+
+            if not (self.operating_range.minimum < temperature_range.minimum < self.operating_range.maximum and \
+                    self.operating_range.minimum < temperature_range.maximum < self.operating_range.maximum):
+                self._send_protect_envelopes(temperature_range)
+                self.database.set_protected()
         pass

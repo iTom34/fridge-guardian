@@ -1,5 +1,7 @@
 from unittest.mock import Mock, call
 
+import pytest
+
 from fridgeGuardian.yr import Yr
 from fridgeGuardian.database import Database
 from fridgeGuardian.email import Email
@@ -12,7 +14,12 @@ from pytest import fixture
 
 DEVICE_NAME = "device_name"
 EMAIL_LIST = ["test1@test.com", "test2@test.com"]
-
+OUT_OF_SPEC = [TemperatureRange(minimum=10, maximum=15),
+               TemperatureRange(minimum=10, maximum=25),
+               TemperatureRange(minimum=10, maximum=40),
+               TemperatureRange(minimum=25, maximum=40),
+               TemperatureRange(minimum=40, maximum=50)]
+IN_SPEC = TemperatureRange(minimum=25, maximum=30)
 
 @fixture
 def device():
@@ -21,7 +28,7 @@ def device():
                     email=Mock(name="email"),
                     email_list=EMAIL_LIST,
                     database=Mock(name="database"),
-                    operating_range=Mock(name="TemperatureRange"))
+                    operating_range=TemperatureRange(minimum=20, maximum=35))
     return device
 
 
@@ -45,9 +52,25 @@ def test_clear_protected(device):
 def test_find_temperature_range(device):
     device.weather.get_weather_forcast.return_value = WEATHER_FORCAST
 
-    result = device._forcast_find_temperature_range()
+    result = device._get_temperature_range()
     assert result.minimum == 10.9
     assert result.maximum == 28.3
+
+
+class TestCheckTemperature:
+    @pytest.mark.parametrize('temperature_range', OUT_OF_SPEC)
+    def test_unprotected_out_of_range(self, temperature_range, device):
+        device._get_temperature_range = Mock(return_value=temperature_range)
+        device._get_protected = Mock(return_value=False)
+        device._send_protect_envelopes = Mock()
+        device.database.set_protected = Mock()
+
+        device.check_temperature()
+
+        device._get_temperature_range.assert_called_once()
+        device._get_protected.assert_called_once()
+        device._send_protect_envelopes.assert_called_once_with(temperature_range)
+        device.database.set_protected.assert_called_once()
 
 
 def test_build_protect_envelopes(device):
