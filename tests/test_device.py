@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 from fridgeGuardian.yr import Yr
 from fridgeGuardian.database import Database
@@ -48,3 +48,18 @@ def test_find_temperature_range(device):
     assert result.minimum == 10.9
     assert result.maximum == 28.3
 
+
+def test_build_protect_envelopes(device):
+    device.email.build_envelope = Mock(side_effect=["envelope_1", "envelope_2"])
+
+    envelopes = device._build_protect_envelopes(TemperatureRange(minimum=10.0, maximum=20.0))
+
+    assert envelopes == ["envelope_1", "envelope_2"]
+
+
+def test_build_unprotect_envelopes(device):
+    device.email.build_envelope = Mock(side_effect=["envelope_1", "envelope_2"])
+
+    envelopes = device._build_unprotect_envelopes(TemperatureRange(minimum=10.0, maximum=20.0))
+
+    assert envelopes == ["envelope_1", "envelope_2"]

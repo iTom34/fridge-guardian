@@ -27,7 +27,7 @@ class Device:
         self.name: str = name
         self.weather: Yr = weather
         self.email: Email = email
-        self.email_list: list[str]
+        self.email_list: list[str] = email_list
         self.database: Database = database
         self.operating_range: TemperatureRange = operating_range
 
@@ -70,8 +70,67 @@ class Device:
 
         return temperature_range
 
-    def _build_envelopes(self) -> list[Envelope]:
-        pass
+    def _build_protect_envelopes(self, temperature_range: TemperatureRange) -> list[Envelope]:
+        """
+        Builds the envelopes to protect the device
+
+        :return: List of Envelope containing the message to ask to protect the device.
+        """
+
+        subject = f"""Protect your {self.name}"""
+
+        message = f"""
+        Temperatures are getting out of operational range.
+
+        -> Protect your device
+
+        Temperature range [{temperature_range.minimum}, {temperature_range.maximum}]
+        Device range: [{self.operating_range.minimum}, {self.operating_range.maximum}]
+
+        Fridge-guardian
+        Keeps an eye on your devices ;)"""
+
+        envelopes = []
+
+        for contact in self.email_list:
+            envelope = self.email.build_envelope(subject=subject,
+                                                 message=message,
+                                                 dest_addr=contact,
+                                                 dest_name="")
+            envelopes.append(envelope)
+
+        return envelopes
+
+    def _build_unprotect_envelopes(self, temperature_range: TemperatureRange) -> list[Envelope]:
+        """
+        Builds the envelopes to unprotect the device
+
+        :return: List of Envelope containing the message to ask to unprotect the device.
+        """
+
+        subject = f"""Your {self.name} don't need protection anymore"""
+
+        message = f"""
+        Temperatures are getting in the operational range.
+
+        -> Your {self.name} don't need to be protected anymore
+
+        Temperature range [{temperature_range.minimum}, {temperature_range.maximum}]
+        Device range: [{self.operating_range.minimum}, {self.operating_range.maximum}]
+
+        Fridge-guardian
+        Keeps an eye on your devices ;)"""
+
+        envelopes = []
+
+        for contact in self.email_list:
+            envelope = self.email.build_envelope(subject=subject,
+                                                 message=message,
+                                                 dest_addr=contact,
+                                                 dest_name="")
+            envelopes.append(envelope)
+
+        return envelopes
 
     def _send_emails(self):
         pass
