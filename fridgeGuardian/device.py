@@ -2,6 +2,7 @@ from fridgeGuardian.yr import Yr
 from fridgeGuardian.database import Database
 from fridgeGuardian.email import Email
 from fridgeGuardian.temperature import TemperatureRange
+from rich.console import Console
 
 from envelopes import Envelope
 
@@ -70,12 +71,13 @@ class Device:
 
         return temperature_range
 
-    def _build_protect_envelopes(self, temperature_range: TemperatureRange) -> list[Envelope]:
+    def _send_protect_envelopes(self, temperature_range: TemperatureRange):
         """
         Builds the envelopes to protect the device
 
         :return: List of Envelope containing the message to ask to protect the device.
         """
+        console = Console()
 
         subject = f"""Protect your {self.name}"""
 
@@ -92,6 +94,7 @@ class Device:
 
         envelopes = []
 
+        # Building the envelopes
         for contact in self.email_list:
             envelope = self.email.build_envelope(subject=subject,
                                                  message=message,
@@ -99,14 +102,21 @@ class Device:
                                                  dest_name="")
             envelopes.append(envelope)
 
+        # Sending the envelopes
+        for envelope in envelopes:
+            console.print(f":incoming_envelope: Sending protect your {self.name} to {envelope.to_addr}")
+            self.email.send(envelope)
+
         return envelopes
 
-    def _build_unprotect_envelopes(self, temperature_range: TemperatureRange) -> list[Envelope]:
+    def _send_unprotect_envelopes(self, temperature_range: TemperatureRange):
         """
         Builds the envelopes to unprotect the device
 
         :return: List of Envelope containing the message to ask to unprotect the device.
         """
+
+        console = Console()
 
         subject = f"""Your {self.name} don't need protection anymore"""
 
@@ -130,10 +140,12 @@ class Device:
                                                  dest_name="")
             envelopes.append(envelope)
 
-        return envelopes
+        # Sending the envelopes
+        for envelope in envelopes:
+            self.email.send(envelope)
+            console.print(f":incoming_envelope: Sending unprotect your {self.name} to {envelope.to_addr}")
 
-    def _send_emails(self):
-        pass
+        return envelopes
 
     def check_temperature(self):
         pass

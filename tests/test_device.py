@@ -6,6 +6,7 @@ from fridgeGuardian.email import Email
 from fridgeGuardian.temperature import TemperatureRange
 from fridgeGuardian.device import Device
 from tests.ressources import WEATHER_FORCAST
+from envelopes import Envelope
 
 from pytest import fixture
 
@@ -50,16 +51,24 @@ def test_find_temperature_range(device):
 
 
 def test_build_protect_envelopes(device):
-    device.email.build_envelope = Mock(side_effect=["envelope_1", "envelope_2"])
+    envelope_1 = Envelope(to_addr="to_addr_1")
+    envelope_2 = Envelope(to_addr="to_addr_2")
 
-    envelopes = device._build_protect_envelopes(TemperatureRange(minimum=10.0, maximum=20.0))
+    device.email.build_envelope = Mock(side_effect=[envelope_1, envelope_2])
+    device.email.send = Mock()
 
-    assert envelopes == ["envelope_1", "envelope_2"]
+    device._send_protect_envelopes(TemperatureRange(minimum=10.0, maximum=20.0))
+
+    device.email.send.assert_called()
 
 
 def test_build_unprotect_envelopes(device):
-    device.email.build_envelope = Mock(side_effect=["envelope_1", "envelope_2"])
+    envelope_1 = Envelope(to_addr="to_addr_1")
+    envelope_2 = Envelope(to_addr="to_addr_2")
 
-    envelopes = device._build_unprotect_envelopes(TemperatureRange(minimum=10.0, maximum=20.0))
+    device.email.build_envelope = Mock(side_effect=[envelope_1, envelope_2])
+    device.email.send = Mock()
 
-    assert envelopes == ["envelope_1", "envelope_2"]
+    device._send_unprotect_envelopes(TemperatureRange(minimum=10.0, maximum=20.0))
+
+    device.email.send.assert_called()
