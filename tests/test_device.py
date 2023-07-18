@@ -60,6 +60,9 @@ def test_find_temperature_range(device):
 class TestCheckTemperature:
     @pytest.mark.parametrize('temperature_range', OUT_OF_SPEC)
     def test_unprotected_out_of_range(self, temperature_range, device):
+        """
+        Testing an unprotected device with a tempearture out of range
+        """
         device._get_temperature_range = Mock(return_value=temperature_range)
         device._get_protected = Mock(return_value=False)
         device._send_protect_envelopes = Mock()
@@ -71,6 +74,55 @@ class TestCheckTemperature:
         device._get_protected.assert_called_once()
         device._send_protect_envelopes.assert_called_once_with(temperature_range)
         device.database.set_protected.assert_called_once()
+
+    def test_unprotected_in_range(self, device):
+        """
+        Testing an unprotected device with a tempearture in range
+        """
+        device._get_temperature_range = Mock(return_value=IN_SPEC)
+        device._get_protected = Mock(return_value=False)
+        device._send_protect_envelopes = Mock()
+        device.database.set_protected = Mock()
+
+        device.check_temperature()
+
+        device._get_temperature_range.assert_called_once()
+        device._get_protected.assert_called_once()
+        device._send_protect_envelopes.assert_not_called()
+        device.database.set_protected.assert_not_called()
+
+    @pytest.mark.parametrize('temperature_range', OUT_OF_SPEC)
+    def test_protected_out_of_range(self, temperature_range, device):
+        """
+        Testing a protected device with a tempearture out of range
+        """
+        device._get_temperature_range = Mock(return_value=temperature_range)
+        device._get_protected = Mock(return_value=True)
+        device._send_unprotect_envelopes = Mock()
+        device.database.clear_protected = Mock()
+
+        device.check_temperature()
+
+        device._get_temperature_range.assert_called_once()
+        device._get_protected.assert_called_once()
+        device._send_unprotect_envelopes.assert_not_called()
+        device.database.clear_protected.assert_not_called()
+
+    def test_protected_in_range(self, device):
+        """
+        Testing a protected device with a tempearture in range
+        """
+        device._get_temperature_range = Mock(return_value=IN_SPEC)
+        device._get_protected = Mock(return_value=True)
+        device._send_unprotect_envelopes = Mock()
+        device.database.clear_protected = Mock()
+
+        device.check_temperature()
+
+        device._get_temperature_range.assert_called_once()
+        device._get_protected.assert_called_once()
+        device._send_unprotect_envelopes.assert_called_once_with(IN_SPEC)
+        device.database.clear_protected.assert_called_once()
 
 
 def test_build_protect_envelopes(device):
