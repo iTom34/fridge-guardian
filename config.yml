@@ -1,0 +1,28 @@
+---
+time_zone: "Europe/Oslo"
+database:
+  host: "127.0.0.1"
+  user: "root"
+  password: "root"
+  database: "fridge_guardian"
+email:
+  smtp_address: "smtp.email.com"
+  smtp_port: 487
+  login: "test@email.com"
+  password: "a_strong_password"
+  tls: True
+  from_email: "test@email.com"
+  from_name: "Fridge Guardian"
+devices:
+  - name: "Outdoor fridge"
+    longitude: 33.631839
+    latitude: 27.380583
+    email_list:
+      - "email_1@email.com"
+      - "email_2@email.com"
+    temperature_min: "10"
+    temperature_max: "60"
+
+
+
+

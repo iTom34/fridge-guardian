@@ -1,5 +1,6 @@
 import fridgeGuardian.yr
 
+from fridgeGuardian.app_settings import YR_IDENTITY
 from fridgeGuardian.yr import Yr
 from pytest import fixture
 from mock import patch, Mock
@@ -9,7 +10,6 @@ from tests.ressources import WEATHER_FORCAST, WEATHER_FORCAST_2
 
 GREENWICH_LONGITUDE = -0.00143
 GREENWICH_LATITUDE = 51.47782
-YR_IDENTITY = "fridge-guardian github.com/iTom34/fridge-guardian"
 HEADERS = {'Expires': 'Mon, 03 Jul 2023 07:30:00 GMT'}
 
 @fixture

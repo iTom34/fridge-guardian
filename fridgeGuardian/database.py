@@ -26,8 +26,15 @@ class Database:
         self.password = password
         self.database = database
 
-        console = Console()
+    def init_database(self):
+        """
+        Initialise database:
+        - Create the database
+        - Create table
 
+
+        :return:
+        """
         try:
             with connect(
                 host=self.host,

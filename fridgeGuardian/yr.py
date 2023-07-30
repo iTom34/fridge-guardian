@@ -17,7 +17,7 @@ class Yr:
                  longitude:float,
                  latitude: float,
                  identity: str,
-                 time_zone: str = "Europe/Oslo"):
+                 time_zone: pytz.timezone = pytz.timezone("Europe/Oslo")):
         """
         Constructor for the Yr API
 
@@ -32,7 +32,7 @@ class Yr:
         self.weather_forcast: dict = dict()         # Last weather forcast
         self.expire: datetime = datetime.now()      # Expiration date of the last report
         self.expire_raw: str = ""                   # Expiration date from the header response
-        self._time_zone = pytz.timezone(time_zone)  # Time zone
+        self._time_zone = time_zone                 # Time zone
 
     def _build_url(self) -> str:
         """
