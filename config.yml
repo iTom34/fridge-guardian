@@ -20,8 +20,8 @@ devices:
     email_list:
       - "email_1@email.com"
       - "email_2@email.com"
-    temperature_min: "10"
-    temperature_max: "60"
+    temperature_min: 10
+    temperature_max: 60
 
 
 
